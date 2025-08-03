@@ -12,7 +12,7 @@
     Application Structure Plan: The application is structured into three main thematic sections corresponding to the career phases: Data Analyst, Data Scientist, and ML/AI Engineer. This non-linear, dashboard-style approach was chosen over a simple monthly list to give the user a clearer sense of progression and skill-stacking. Users can navigate between these phases using prominent tabs. Within each phase, months are presented as distinct, expandable sections. This allows users to focus on one month at a time while still seeing the overall context of the phase. The key interaction is clicking on a month to reveal its detailed topics, projects, and a progress checklist, making the vast amount of information manageable and preventing cognitive overload. This structure supports both high-level planning and detailed, focused learning.
     Visualization & Content Choices: 
     - Report Info: Overall 9-month timeline. -> Goal: Show progress and time allocation. -> Viz/Method: A single, top-level donut chart. -> Interaction: The chart segments are clickable, filtering the view to the corresponding phase. -> Justification: Provides an immediate, high-level overview of the entire roadmap and an intuitive way to navigate. -> Library/Method: Chart.js (Canvas).
-    - Report Info: Monthly topics and projects. -> Goal: Organize and present detailed learning steps. -> Viz/Method: Interactive cards with a saveable checklist and expandable sections (HTML/CSS/Tailwind). -> Interaction: Clicking a month's card expands it to show details. Clicking on a topic checkbox will save its state to local storage. -> Justification: This progressive disclosure pattern keeps the main interface clean while allowing users to drill down into specifics as needed. The addition of a saveable checklist makes the experience highly practical and engaging for tracking personal progress. -> Library/Method: HTML/CSS + JS for interaction and local storage.
+    - Report Info: Monthly topics and projects. -> Goal: Organize and present detailed learning steps. -> Viz/Method: Interactive cards with a saveable checklist, monthly progress bars, and expandable sections (HTML/CSS/Tailwind). -> Interaction: Clicking a month's card expands it to show details. Clicking on a topic checkbox updates the monthly progress bar and the main donut chart, and saves the state to local storage. -> Justification: This progressive disclosure pattern keeps the main interface clean while allowing users to drill down into specifics as needed. The visual feedback from the progress bars and the dynamic chart is highly motivating and practical for tracking progress. -> Library/Method: HTML/CSS + JS for interaction and local storage.
     - Report Info: Skill progression across phases. -> Goal: Inform the user about the skills they are building. -> Viz/Method: Themed sections with introductory text. -> Interaction: Static text updated upon phase selection. -> Justification: Provides essential context for each phase, explaining what skills are being developed and why they are important for the next step in the career path. -> Library/Method: HTML + JS.
     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
@@ -205,6 +205,60 @@
             engineer: 'pink'
         };
 
+        let roadmapChart;
+
+        function updateUI() {
+            const allTopics = document.querySelectorAll('.form-checkbox');
+            const totalTopics = allTopics.length;
+            const completedTopics = document.querySelectorAll('.form-checkbox:checked').length;
+
+            const newChartData = {
+                analyst: { completed: 0, total: 0 },
+                scientist: { completed: 0, total: 0 },
+                engineer: { completed: 0, total: 0 },
+            };
+
+            for (const phase in roadmapData) {
+                roadmapData[phase].forEach(monthData => {
+                    const monthId = `month-${monthData.month}-topic-`;
+                    monthData.topics.forEach((_, index) => {
+                        newChartData[phase].total++;
+                        if (document.getElementById(monthId + index).checked) {
+                            newChartData[phase].completed++;
+                        }
+                    });
+                });
+            }
+
+            const chartDataArray = [
+                newChartData.analyst.completed, newChartData.analyst.total - newChartData.analyst.completed,
+                newChartData.scientist.completed, newChartData.scientist.total - newChartData.scientist.completed,
+                newChartData.engineer.completed, newChartData.engineer.total - newChartData.engineer.completed,
+            ];
+            
+            roadmapChart.data.datasets[0].data = chartDataArray;
+            roadmapChart.update();
+
+            document.querySelectorAll('.month-card').forEach(card => {
+                const phase = card.querySelector('.form-checkbox').dataset.phase;
+                const month = card.querySelector('.form-checkbox').dataset.month;
+                const monthData = roadmapData[phase].find(m => m.month == month);
+                if (monthData) {
+                    const totalMonthTopics = monthData.topics.length;
+                    const completedMonthTopics = card.querySelectorAll('.form-checkbox:checked').length;
+                    const progressPercentage = totalMonthTopics > 0 ? Math.round((completedMonthTopics / totalMonthTopics) * 100) : 0;
+                    
+                    const progressBar = card.querySelector('.progress-bar');
+                    const progressText = card.querySelector('.progress-text');
+
+                    if (progressBar && progressText) {
+                        progressBar.style.width = `${progressPercentage}%`;
+                        progressText.textContent = `${progressPercentage}% completed`;
+                    }
+                }
+            });
+        }
+
         function createMonthCard(monthData, phase) {
             const color = phaseColors[phase];
 
@@ -226,6 +280,10 @@
                             <span class="text-gray-400 text-2xl">&#x25BC;</span>
                         </div>
                         <h3 class="text-lg font-bold mt-3 text-gray-900">${monthData.focus}</h3>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
+                            <div class="progress-bar bg-${color}-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                        </div>
+                        <p class="progress-text text-xs text-gray-500 mt-2">0% completed</p>
                     </div>
                     <div class="details-panel text-gray-700">
                         <div>
@@ -267,6 +325,7 @@
                 }
             });
             localStorage.setItem('roadmapProgress', JSON.stringify(progress));
+            updateUI();
         }
 
         function loadProgress() {
@@ -277,6 +336,7 @@
                 const topicIndex = checkbox.dataset.topicIndex;
                 if (progress[phase] && progress[phase][month] && progress[phase][month].includes(topicIndex)) {
                     checkbox.checked = true;
+                    checkbox.closest('li').querySelector('label').classList.add('line-through', 'text-gray-400');
                 }
             });
         }
@@ -286,7 +346,52 @@
             renderPhase('scientist');
             renderPhase('engineer');
 
+            const ctx = document.getElementById('roadmap-chart').getContext('2d');
+            roadmapChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'Analyst Completed', 'Analyst Remaining',
+                        'Scientist Completed', 'Scientist Remaining',
+                        'Engineer Completed', 'Engineer Remaining'
+                    ],
+                    datasets: [{
+                        data: [0, 1, 0, 1, 0, 1],
+                        backgroundColor: [
+                            'rgba(99, 102, 241, 1)', 'rgba(99, 102, 241, 0.2)',
+                            'rgba(168, 85, 247, 1)', 'rgba(168, 85, 247, 0.2)',
+                            'rgba(236, 72, 153, 1)', 'rgba(236, 72, 153, 0.2)'
+                        ],
+                        borderColor: 'transparent',
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    if (context.parsed > 0) {
+                                        return `${label}: ${context.parsed} topics`;
+                                    }
+                                    return null;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
             loadProgress();
+            updateUI();
 
             const tabs = document.querySelectorAll('.phase-tab');
             const contents = document.querySelectorAll('.phase-content');
@@ -329,73 +434,17 @@
                 }
 
                 if (e.target.matches('.form-checkbox')) {
-                    saveProgress();
-                }
-            });
-            
-            // Chart.js implementation
-            const ctx = document.getElementById('roadmap-chart').getContext('2d');
-            const roadmapChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Data Analyst', 'Data Scientist', 'ML/AI Engineer'],
-                    datasets: [{
-                        label: 'Months per Phase',
-                        data: [5, 2, 2],
-                        backgroundColor: [
-                            'rgba(99, 102, 241, 0.7)',
-                            'rgba(168, 85, 247, 0.7)',
-                            'rgba(236, 72, 153, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(99, 102, 241, 1)',
-                            'rgba(168, 85, 247, 1)',
-                            'rgba(236, 72, 153, 1)'
-                        ],
-                        borderWidth: 2,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '60%',
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: {
-                                    size: 14,
-                                    family: 'Inter'
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += context.parsed + ' months';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    onClick: (evt, elements) => {
-                        if (elements.length > 0) {
-                            const index = elements[0].index;
-                            const phase = ['analyst', 'scientist', 'engineer'][index];
-                            document.querySelector(`.phase-tab[data-phase="${phase}"]`).click();
-                        }
+                    const label = e.target.nextElementSibling;
+                    if (e.target.checked) {
+                        label.classList.add('line-through', 'text-gray-400');
+                    } else {
+                        label.classList.remove('line-through', 'text-gray-400');
                     }
+                    saveProgress();
                 }
             });
         });
     </script>
 </body>
 </html>
+
