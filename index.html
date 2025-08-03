@@ -7,15 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- 
-    Chosen Palette: Warm Neutrals
-    Application Structure Plan: The application is structured into three main thematic sections corresponding to the career phases: Data Analyst, Data Scientist, and ML/AI Engineer. This non-linear, dashboard-style approach was chosen over a simple monthly list to give the user a clearer sense of progression and skill-stacking. Users can navigate between these phases using prominent tabs. Within each phase, months are presented as distinct, expandable sections. This allows users to focus on one month at a time while still seeing the overall context of the phase. The key interaction is clicking on a month to reveal its detailed topics, projects, and a progress checklist, making the vast amount of information manageable and preventing cognitive overload. This structure supports both high-level planning and detailed, focused learning.
-    Visualization & Content Choices: 
-    - Report Info: Overall 9-month timeline. -> Goal: Show progress and time allocation. -> Viz/Method: A single, top-level donut chart. -> Interaction: The chart segments are clickable, filtering the view to the corresponding phase. -> Justification: Provides an immediate, high-level overview of the entire roadmap and an intuitive way to navigate. -> Library/Method: Chart.js (Canvas).
-    - Report Info: Monthly topics and projects. -> Goal: Organize and present detailed learning steps. -> Viz/Method: Interactive cards with a saveable checklist, monthly progress bars, and expandable sections (HTML/CSS/Tailwind). -> Interaction: Clicking a month's card expands it to show details. Clicking on a topic checkbox updates the monthly progress bar and the main donut chart, and saves the state to local storage. -> Justification: This progressive disclosure pattern keeps the main interface clean while allowing users to drill down into specifics as needed. The visual feedback from the progress bars and the dynamic chart is highly motivating and practical for tracking progress. -> Library/Method: HTML/CSS + JS for interaction and local storage.
-    - Report Info: Skill progression across phases. -> Goal: Inform the user about the skills they are building. -> Viz/Method: Themed sections with introductory text. -> Interaction: Static text updated upon phase selection. -> Justification: Provides essential context for each phase, explaining what skills are being developed and why they are important for the next step in the career path. -> Library/Method: HTML + JS.
-    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
-    -->
+    <link rel="icon" type="image/x-icon" href="https://img.favpng.com/8/23/5/computer-icons-code-symbol-png-favpng-qrbG5pRKF1WNJNpEMYabLCbKm.jpg">
+   
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -58,9 +51,10 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8">
+    <!-- Main App -->
+    <div id="main-app" class="container mx-auto p-4 md:p-8">
         <header class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">My 9-Month Coding Roadmap</h1>
+            <h1 id="main-heading" class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">My 9-Month Coding Roadmap</h1>
             <p class="text-lg text-gray-600">From Beginner to ML/AI Engineer</p>
         </header>
 
@@ -214,10 +208,6 @@
         let roadmapChart;
 
         function updateUI() {
-            const allTopics = document.querySelectorAll('.form-checkbox');
-            const totalTopics = allTopics.length;
-            const completedTopics = document.querySelectorAll('.form-checkbox:checked').length;
-
             const newChartData = {
                 analyst: { completed: 0, total: 0 },
                 scientist: { completed: 0, total: 0 },
@@ -226,11 +216,13 @@
 
             for (const phase in roadmapData) {
                 roadmapData[phase].forEach(monthData => {
-                    const monthId = `month-${monthData.month}-topic-`;
                     monthData.topics.forEach((_, index) => {
-                        newChartData[phase].total++;
-                        if (document.getElementById(monthId + index).checked) {
-                            newChartData[phase].completed++;
+                        const checkbox = document.getElementById(`month-${monthData.month}-${phase}-topic-${index}`);
+                        if(checkbox){
+                            newChartData[phase].total++;
+                            if (checkbox.checked) {
+                                newChartData[phase].completed++;
+                            }
                         }
                     });
                 });
@@ -242,12 +234,17 @@
                 newChartData.engineer.completed, newChartData.engineer.total - newChartData.engineer.completed,
             ];
 
-            roadmapChart.data.datasets[0].data = chartDataArray;
-            roadmapChart.update();
+            if (roadmapChart) {
+                roadmapChart.data.datasets[0].data = chartDataArray;
+                roadmapChart.update();
+            }
 
             document.querySelectorAll('.month-card').forEach(card => {
-                const phase = card.querySelector('.form-checkbox').dataset.phase;
-                const month = card.querySelector('.form-checkbox').dataset.month;
+                const checklistContainer = card.querySelector('.checklist-container');
+                if (!checklistContainer) return;
+
+                const phase = checklistContainer.dataset.phase;
+                const month = checklistContainer.dataset.month;
                 const monthData = roadmapData[phase].find(m => m.month == month);
                 if (monthData) {
                     const totalMonthTopics = monthData.topics.length;
@@ -264,20 +261,25 @@
                 }
             });
         }
-
-        function createMonthCard(monthData, phase) {
+        
+        function renderTopics(monthData, phase) {
             const color = phaseColors[phase];
-
             const topicsHTML = monthData.topics.map((topic, index) => {
-                const uniqueId = `month-${monthData.month}-topic-${index}`;
+                const uniqueId = `month-${monthData.month}-${phase}-topic-${index}`;
                 return `
-                    <li class="flex items-center space-x-2 py-1">
+                    <li class="flex items-center space-x-2 py-1 group">
                         <input type="checkbox" id="${uniqueId}" data-month="${monthData.month}" data-phase="${phase}" data-topic-index="${index}" class="form-checkbox text-${color}-500 rounded border-gray-300 focus:ring-${color}-500">
                         <label for="${uniqueId}" class="text-sm cursor-pointer">${topic}</label>
+                        <button class="remove-topic-btn text-gray-400 hover:text-red-500 text-sm opacity-0 group-hover:opacity-100 transition-opacity" data-month="${monthData.month}" data-phase="${phase}" data-topic-index="${index}">&times;</button>
                     </li>
                 `;
             }).join('');
+            return topicsHTML;
+        }
 
+        function createMonthCard(monthData, phase) {
+            const color = phaseColors[phase];
+            const topicsHTML = renderTopics(monthData, phase);
             return `
                 <div class="bg-white rounded-xl shadow-sm month-card cursor-pointer">
                     <div class="p-6 month-header">
@@ -294,17 +296,21 @@
                     <div class="details-panel text-gray-700">
                         <div>
                             <h4 class="font-semibold mb-2">Key Topics:</h4>
-                            <ul class="text-sm mb-4 space-y-1 checklist-container">
+                            <ul class="text-sm mb-4 space-y-1 checklist-container" data-month="${monthData.month}" data-phase="${phase}">
                                 ${topicsHTML}
                             </ul>
                             <h4 class="font-semibold mb-2">Practice / Projects:</h4>
                             <p class="text-sm mb-4">${monthData.projects}</p>
+                            <div class="flex items-center space-x-2 mt-4">
+                                <input type="text" placeholder="Add a new topic..." class="add-topic-input w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-${color}-500" data-month="${monthData.month}" data-phase="${phase}">
+                                <button class="add-topic-btn bg-${color}-500 hover:bg-${color}-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors" data-month="${monthData.month}" data-phase="${phase}">Add</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         }
-
+        
         function renderPhase(phase) {
             const containerId = `${phase}-months`;
             const container = document.getElementById(containerId);
@@ -331,10 +337,20 @@
                 }
             });
             localStorage.setItem('roadmapProgress', JSON.stringify(progress));
+            localStorage.setItem('roadmapData', JSON.stringify(roadmapData));
             updateUI();
         }
 
         function loadProgress() {
+            const savedData = JSON.parse(localStorage.getItem('roadmapData'));
+            if (savedData) {
+                Object.assign(roadmapData, savedData);
+            }
+
+            renderPhase('analyst');
+            renderPhase('scientist');
+            renderPhase('engineer');
+
             const progress = JSON.parse(localStorage.getItem('roadmapProgress')) || {};
             document.querySelectorAll('.form-checkbox').forEach(checkbox => {
                 const month = checkbox.dataset.month;
@@ -346,12 +362,25 @@
                 }
             });
         }
+        
+        function loadUserName() {
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('main-heading').textContent = `Hi, ${userName}! Our 9-Month Career Roadmap`;
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
+            
+            const roadmapContent = document.getElementById('roadmap-content');
+            const tabs = document.querySelectorAll('.phase-tab');
+            const contents = document.querySelectorAll('.phase-content');
+            
+            // Render phases first to ensure elements exist in the DOM
             renderPhase('analyst');
             renderPhase('scientist');
             renderPhase('engineer');
-
+            
             const ctx = document.getElementById('roadmap-chart').getContext('2d');
             roadmapChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -368,8 +397,8 @@
                             chartColors.scientist.primary, chartColors.scientist.secondary,
                             chartColors.engineer.primary, chartColors.engineer.secondary
                         ],
-                        borderColor: '#ffffff',
-                        borderWidth: 2,
+                        borderColor: ['#ffffff', 'transparent', '#ffffff', 'transparent', '#ffffff', 'transparent'],
+                        borderWidth: [2, 0, 2, 0, 2, 0],
                         hoverOffset: 4
                     }]
                 },
@@ -396,11 +425,11 @@
                 }
             });
 
+            // Now that all elements and chart are initialized, load progress and update UI
             loadProgress();
             updateUI();
 
-            const tabs = document.querySelectorAll('.phase-tab');
-            const contents = document.querySelectorAll('.phase-content');
+            loadUserName();
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -418,7 +447,6 @@
                 });
             });
 
-            const roadmapContent = document.getElementById('roadmap-content');
             roadmapContent.addEventListener('click', (e) => {
                 const header = e.target.closest('.month-header');
                 if (header) {
@@ -448,10 +476,66 @@
                     }
                     saveProgress();
                 }
+
+                if (e.target.matches('.remove-topic-btn')) {
+                    const btn = e.target;
+                    const phase = btn.dataset.phase;
+                    const month = btn.dataset.month;
+                    const topicIndex = btn.dataset.topicIndex;
+                    const monthData = roadmapData[phase].find(m => m.month == month);
+                    if (monthData) {
+                        monthData.topics.splice(topicIndex, 1);
+                        saveProgress();
+                        const checklistContainer = btn.closest('.checklist-container');
+                        checklistContainer.innerHTML = renderTopics(monthData, phase);
+                        loadProgress();
+                    }
+                }
+            });
+
+            roadmapContent.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const input = e.target;
+                    if (input.matches('.add-topic-input')) {
+                        const newTopic = input.value.trim();
+                        if (newTopic) {
+                            const phase = input.dataset.phase;
+                            const month = input.dataset.month;
+                            const monthData = roadmapData[phase].find(m => m.month == month);
+                            if (monthData) {
+                                monthData.topics.push(newTopic);
+                                saveProgress();
+                                input.value = '';
+                                const checklistContainer = input.closest('.details-panel').querySelector('.checklist-container');
+                                checklistContainer.innerHTML = renderTopics(monthData, phase);
+                                loadProgress();
+                            }
+                        }
+                    }
+                }
+            });
+
+            roadmapContent.addEventListener('click', (e) => {
+                if (e.target.matches('.add-topic-btn')) {
+                    const btn = e.target;
+                    const input = btn.previousElementSibling;
+                    const newTopic = input.value.trim();
+                    if (newTopic) {
+                        const phase = btn.dataset.phase;
+                        const month = btn.dataset.month;
+                        const monthData = roadmapData[phase].find(m => m.month == month);
+                        if (monthData) {
+                            monthData.topics.push(newTopic);
+                            saveProgress();
+                            input.value = '';
+                            const checklistContainer = btn.closest('.details-panel').querySelector('.checklist-container');
+                            checklistContainer.innerHTML = renderTopics(monthData, phase);
+                            loadProgress();
+                        }
+                    }
+                }
             });
         });
     </script>
 </body>
 </html>
-
-
