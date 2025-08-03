@@ -194,7 +194,7 @@
                 {
                     month: 9, focus: "Advanced Topics & Job Prep", topics: [
                         "CNNs for image classification", "RNNs for NLP", "System design for ML", "Data structures & algorithms", "Interview prep", "Resume & portfolio polish"
-                    ], projects: "CNN for image classification, NLP model, Mock interviews"
+                    ], projects: "CNNs for image classification, NLP model, Mock interviews"
                 },
             ]
         };
@@ -203,6 +203,12 @@
             analyst: 'indigo',
             scientist: 'purple',
             engineer: 'pink'
+        };
+
+        const chartColors = {
+            analyst: { primary: '#4338CA', secondary: '#4338CA40' },
+            scientist: { primary: '#7C3AED', secondary: '#7C3AED40' },
+            engineer: { primary: '#DB2777', secondary: '#DB277740' }
         };
 
         let roadmapChart;
@@ -235,7 +241,7 @@
                 newChartData.scientist.completed, newChartData.scientist.total - newChartData.scientist.completed,
                 newChartData.engineer.completed, newChartData.engineer.total - newChartData.engineer.completed,
             ];
-            
+
             roadmapChart.data.datasets[0].data = chartDataArray;
             roadmapChart.update();
 
@@ -358,12 +364,12 @@
                     datasets: [{
                         data: [0, 1, 0, 1, 0, 1],
                         backgroundColor: [
-                            'rgba(99, 102, 241, 1)', 'rgba(99, 102, 241, 0.2)',
-                            'rgba(168, 85, 247, 1)', 'rgba(168, 85, 247, 0.2)',
-                            'rgba(236, 72, 153, 1)', 'rgba(236, 72, 153, 0.2)'
+                            chartColors.analyst.primary, chartColors.analyst.secondary,
+                            chartColors.scientist.primary, chartColors.scientist.secondary,
+                            chartColors.engineer.primary, chartColors.engineer.secondary
                         ],
-                        borderColor: 'transparent',
-                        borderWidth: 0,
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
                         hoverOffset: 4
                     }]
                 },
@@ -447,4 +453,3 @@
     </script>
 </body>
 </html>
-
