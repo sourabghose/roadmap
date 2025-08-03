@@ -9,10 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- 
     Chosen Palette: Warm Neutrals
-    Application Structure Plan: The application is structured into three main thematic sections corresponding to the career phases: Data Analyst, Data Scientist, and ML/AI Engineer. This non-linear, dashboard-style approach was chosen over a simple monthly list to give the user a clearer sense of progression and skill-stacking. Users can navigate between these phases using prominent tabs. Within each phase, months are presented as distinct, expandable sections. This allows users to focus on one month at a time while still seeing the overall context of the phase. The key interaction is clicking on a month to reveal its detailed topics, projects, and resources, making the vast amount of information manageable and preventing cognitive overload. This structure supports both high-level planning and detailed, focused learning.
+    Application Structure Plan: The application is structured into three main thematic sections corresponding to the career phases: Data Analyst, Data Scientist, and ML/AI Engineer. This non-linear, dashboard-style approach was chosen over a simple monthly list to give the user a clearer sense of progression and skill-stacking. Users can navigate between these phases using prominent tabs. Within each phase, months are presented as distinct, expandable sections. This allows users to focus on one month at a time while still seeing the overall context of the phase. The key interaction is clicking on a month to reveal its detailed topics, projects, and a progress checklist, making the vast amount of information manageable and preventing cognitive overload. This structure supports both high-level planning and detailed, focused learning.
     Visualization & Content Choices: 
     - Report Info: Overall 9-month timeline. -> Goal: Show progress and time allocation. -> Viz/Method: A single, top-level donut chart. -> Interaction: The chart segments are clickable, filtering the view to the corresponding phase. -> Justification: Provides an immediate, high-level overview of the entire roadmap and an intuitive way to navigate. -> Library/Method: Chart.js (Canvas).
-    - Report Info: Monthly topics, projects, resources. -> Goal: Organize and present detailed learning steps. -> Viz/Method: Interactive cards and expandable sections (HTML/CSS/Tailwind). -> Interaction: Clicking a month's card expands it to show details. Clicking on a topic checkbox will save its state to local storage. Clicking on resource links opens them in a new tab. -> Justification: This progressive disclosure pattern keeps the main interface clean while allowing users to drill down into specifics as needed. The addition of a saveable checklist makes the experience highly practical and engaging for tracking personal progress. -> Library/Method: HTML/CSS + JS for interaction and local storage.
+    - Report Info: Monthly topics and projects. -> Goal: Organize and present detailed learning steps. -> Viz/Method: Interactive cards with a saveable checklist and expandable sections (HTML/CSS/Tailwind). -> Interaction: Clicking a month's card expands it to show details. Clicking on a topic checkbox will save its state to local storage. -> Justification: This progressive disclosure pattern keeps the main interface clean while allowing users to drill down into specifics as needed. The addition of a saveable checklist makes the experience highly practical and engaging for tracking personal progress. -> Library/Method: HTML/CSS + JS for interaction and local storage.
     - Report Info: Skill progression across phases. -> Goal: Inform the user about the skills they are building. -> Viz/Method: Themed sections with introductory text. -> Interaction: Static text updated upon phase selection. -> Justification: Provides essential context for each phase, explaining what skills are being developed and why they are important for the next step in the career path. -> Library/Method: HTML + JS.
     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
@@ -44,7 +44,7 @@
             padding: 0 1.5rem;
         }
         .details-panel.open {
-            max-height: 1000px; /* Adjust as needed */
+            max-height: 1000px;
             padding: 1.5rem 1.5rem;
         }
         .chart-container {
@@ -150,51 +150,51 @@
                 {
                     month: 1, focus: "Python Fundamentals & Logic Building", topics: [
                         "Variables & Data types", "Type casting", "Input/output", "if, else, elif", "for, while loops", "Loop control", "Functions", "Scope", "Strings", "Lists", "Tuples, Sets, Dictionaries", "Type checking", "Basic error handling"
-                    ], projects: "30+ coding problems, Calculator, Quiz App", resources: [{ name: "Apna College Python", url: "https://www.youtube.com/watch?v=7wnhA5W6k2E&list=PLdo5-d6G5jF-J_lG6gJ_Y1_l_r_y_k_sS" }, { name: "freeCodeCamp Python", url: "https://www.youtube.com/watch?v=rfscVS0vtbw" }]
+                    ], projects: "30+ coding problems, Calculator, Quiz App"
                 },
                 {
                     month: 2, focus: "DSA Basics, Git, & Resume", topics: [
                         "Arrays/Lists", "Linear Search", "Binary Search", "Bubble, Selection, Insertion Sort", "String operations", "Time & Space Complexity", "Recursion basics", "Git commands", "GitHub profile"
-                    ], projects: "30-40 DSA problems, GitHub profile setup, Resume V1", resources: [{ name: "Striver DSA Sheet", url: "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6VZJvGqE_A44p-y-Lp3d" }, { name: "GitHub Guides", url: "https://guides.github.com/" }]
+                    ], projects: "30-40 DSA problems, GitHub profile setup, Resume V1"
                 },
                 {
                     month: 3, focus: "SQL, Excel, & Projects", topics: [
                         "SELECT, WHERE, DISTINCT, LIMIT", "ORDER BY, GROUP BY, HAVING", "Aggregates", "JOINS", "Subqueries", "Window Functions", "Excel formulas", "Pivot Tables"
-                    ], projects: "SQL Queries, Sales Dashboard in Excel", resources: [{ name: "Data with Harshit SQL", url: "https://www.youtube.com/watch?v=7S_tz1z_5bA" }, { name: "Excel by Shubham Sarda", url: "https://www.youtube.com/playlist?list=PLVbF89W9_Y3aTj4Uf90B1J519UuLdF1n2" }]
+                    ], projects: "SQL Queries, Sales Dashboard in Excel"
                 },
                 {
                     month: 4, focus: "Data Manipulation & Visualization", topics: [
                         "Pandas DataFrame", "read_csv()", "loc[], iloc[]", "Filtering", "GroupBy, Merge, Join", "Handling nulls/duplicates", "apply(), lambda", "NumPy arrays", "Matplotlib/Seaborn plots", "EDA"
-                    ], projects: "Titanic Dataset EDA, IPL Stats Visualizer", resources: [{ name: "Krish Naik Pandas Playlist", url: "https://www.youtube.com/playlist?list=PLZoTAEL_RNWgJjL42A39-aP-40f43lR8Z" }, { name: "Python for Data Analysis (Book)", url: "https://www.oreilly.com/library/view/python-for-data/9781491957653/" }]
+                    ], projects: "Titanic Dataset EDA, IPL Stats Visualizer"
                 },
                 {
                     month: 5, focus: "Dashboarding & Portfolio", topics: [
                         "Power BI dashboards", "Filters, Slicers", "DAX basics", "Descriptive statistics", "Inferential statistics", "Hypothesis testing", "Presentation skills"
-                    ], projects: "Power BI Sales Dashboard, Data analysis report", resources: [{ name: "Power BI Full Course", url: "https://www.youtube.com/watch?v=3KzJ1M_m-sU" }, { name: "StatQuest with Josh Starmer", url: "https://www.youtube.com/channel/UCtYLUTtgS3kE0I6-Nym1B-w" }]
+                    ], projects: "Power BI Sales Dashboard, Data analysis report"
                 },
             ],
             scientist: [
                 {
                     month: 6, focus: "Machine Learning Fundamentals", topics: [
                         "Supervised vs Unsupervised", "Regression vs Classification", "Evaluation metrics", "Linear Regression", "Logistic Regression", "Feature Scaling", "Train-test split", "Cross-validation", "scikit-learn basics"
-                    ], projects: "House Price Prediction, Breast Cancer Classifier", resources: [{ name: "Krish Naik ML Playlist", url: "https://www.youtube.com/playlist?list=PLZoTAEL_RNWgZ1D-cE922y40rVpYhS3_j" }, { name: "Coursera: ML with Python", url: "https://www.coursera.org/learn/machine-learning-with-python" }]
+                    ], projects: "House Price Prediction, Breast Cancer Classifier"
                 },
                 {
                     month: 7, focus: "Advanced ML & Deep Learning", topics: [
                         "Decision Trees", "Random Forests", "KNN, SVM", "Ensemble Methods", "Hyperparameter Tuning", "Neural Networks (DNNs)", "Activation functions", "TensorFlow/Keras basics"
-                    ], projects: "Iris Dataset Classifier, Simple DNN implementation", resources: [{ name: "Hands-On ML (Book)", url: "https://www.oreilly.com/library/view/hands-on-machine-learning/9781492032645/" }, { name: "Deep Learning Specialization", url: "https://www.coursera.org/specializations/deep-learning" }]
+                    ], projects: "Iris Dataset Classifier, Simple DNN implementation"
                 },
             ],
             engineer: [
                 {
                     month: 8, focus: "MLOps & Deployment", topics: [
                         "MLOps principles", "Flask API for models", "Streamlit apps", "Docker basics", "Containerizing a model API", "Cloud platforms (conceptual)"
-                    ], projects: "End-to-end ML model API with Flask/Docker, Streamlit app", resources: [{ name: "Docker for beginners", url: "https://docs.docker.com/get-started/" }, { name: "Flask Tutorial", url: "https://flask.palletsprojects.com/en/3.0/tutorial/" }, { name: "Streamlit Docs", url: "https://docs.streamlit.io/" }]
+                    ], projects: "End-to-end ML model API with Flask/Docker, Streamlit app"
                 },
                 {
                     month: 9, focus: "Advanced Topics & Job Prep", topics: [
                         "CNNs for image classification", "RNNs for NLP", "System design for ML", "Data structures & algorithms", "Interview prep", "Resume & portfolio polish"
-                    ], projects: "CNN for image classification, NLP model, Mock interviews", resources: [{ name: "DeepLearning.AI courses", url: "https://www.deeplearning.ai/" }, { name: "Grokking the ML Interview", url: "https://www.educative.io/courses/grokking-machine-learning-interview" }, { name: "Hugging Face Tutorials", url: "https://huggingface.co/learn/nlp-course" }]
+                    ], projects: "CNN for image classification, NLP model, Mock interviews"
                 },
             ]
         };
@@ -207,10 +207,6 @@
 
         function createMonthCard(monthData, phase) {
             const color = phaseColors[phase];
-            const resourcesHTML = monthData.resources.map(res => `
-                <a href="${res.url}" target="_blank" rel="noopener noreferrer" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium py-1 px-3 rounded-full transition-colors">
-                    ${res.name} ↗
-                </a>`).join(' ');
 
             const topicsHTML = monthData.topics.map((topic, index) => {
                 const uniqueId = `month-${monthData.month}-topic-${index}`;
@@ -239,10 +235,6 @@
                             </ul>
                             <h4 class="font-semibold mb-2">Practice / Projects:</h4>
                             <p class="text-sm mb-4">${monthData.projects}</p>
-                            <h4 class="font-semibold mb-2">Recommended Resources:</h4>
-                            <div class="flex flex-wrap gap-2">
-                                ${resourcesHTML}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -351,9 +343,9 @@
                         label: 'Months per Phase',
                         data: [5, 2, 2],
                         backgroundColor: [
-                            'rgba(99, 102, 241, 0.7)',  
-                            'rgba(168, 85, 247, 0.7)', 
-                            'rgba(236, 72, 153, 0.7)'  
+                            'rgba(99, 102, 241, 0.7)',
+                            'rgba(168, 85, 247, 0.7)',
+                            'rgba(236, 72, 153, 0.7)'
                         ],
                         borderColor: [
                             'rgba(99, 102, 241, 1)',
@@ -407,3 +399,4 @@
     </script>
 </body>
 </html>
+
